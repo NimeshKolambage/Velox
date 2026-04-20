@@ -1,6 +1,7 @@
 import { generateToken } from '../lib/utils.js';
 import User from '../models/user.model.js';
 import bcrypt from 'bcryptjs';
+import cloudinary from '../lib/cloudinary.js';
 
 export const signup = async (req, res) => {
     try {
@@ -80,3 +81,35 @@ export const logout = (req, res) => {
         console.error(error, "Error in logout controller");
     }
 };
+
+export const updateProfile=async(req,res)=>{
+
+    try{
+        const {profilePic}=req.body;
+        const user = req.user._id;
+
+        if(!profilePic){
+            return res.status(400).json({ message: "Profile picture is required" });
+        }
+
+        const uplaodResponse=await cloudinary.uploader.upload(profilePic)
+        const updateUser=await User.findByIdAndUpdate(userId,{profilePicture:uplaodResponse.secure_url},{new:true}).select("-password");
+        res.status(200).json({ message: "Profile updated successfully", user:updateUser });
+
+    }
+    catch(error){
+        res.status(500).json({ message: "Server error" });
+        console.error(error, "Error in update profile controller");
+    }
+}
+
+export const checkAuth=async(req,res)=>{
+    try{
+        const user=req.user;    
+        res.status(200).json({ message: "Authenticated", user });
+    }
+    catch(error){
+        res.status(500).json({ message: "Server error" });
+        console.error(error, "Error in check auth controller");
+    }
+}
