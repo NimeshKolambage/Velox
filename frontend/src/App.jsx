@@ -5,8 +5,20 @@ import Login from "./pages/LoginPage"
 import SignupPage from "./pages/SignupPage"
 import SettingPage from "./pages/SettingPage"
 import ProfilePage from "./pages/ProfilePage"
+import { useAuthStore } from "./store/useAuthStore"
+import { use } from "react"
+
+
 
 const App = () => {
+
+  const { authUser, checkAuth } = useAuthStore();
+
+  use(() => {
+    checkAuth();
+  }, [checkAuth]);
+
+  console.log(authUser);
   return (
     <div>
      
