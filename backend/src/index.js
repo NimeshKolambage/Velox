@@ -8,12 +8,24 @@ import cors from 'cors';
 
 dotenv.config();
 const app = express();
+
+const allowedOrigins = ["http://localhost:5173", "http://localhost:5174"];
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+      return;
+    }
+    callback(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+};
+
 app.use(cookieParser());
 app.use(express.json());
-app.use(cors({  
-  origin: 'http://localhost:5173', // Frontend URL
-
-}));
+app.use(cors(corsOptions));
+app.options(/.*/, cors(corsOptions));
 app.use(express.urlencoded({ extended: true }));
 app.use("/api/auth",authRoutes);
 app.use("/api/messages",messageRoutes);
