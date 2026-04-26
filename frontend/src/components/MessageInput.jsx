@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 const MessageInput = () => {
   const [text, setText] = useState("");
   const [imagePreview, setImagePreview] = useState(null);
+  const [isSending, setIsSending] = useState(false);
   const fileInputRef = useRef(null);
   const { sendMessage } = useChatStore();
 
@@ -31,7 +32,9 @@ const MessageInput = () => {
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!text.trim() && !imagePreview) return;
+    if (isSending) return;
 
+    setIsSending(true);
     try {
       await sendMessage({
         text: text.trim(),
@@ -44,13 +47,15 @@ const MessageInput = () => {
       if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (error) {
       console.error("Failed to send message:", error);
+    } finally {
+      setIsSending(false);
     }
   };
 
   return (
-    <div className="p-4 w-full">
+    <div className="p-4 w-full bg-base-200">
       {imagePreview && (
-        <div className="mb-3 flex items-center gap-2">
+        <div className="mb-3 flex items-center gap-2 p-2 bg-base-100 rounded-xl shadow-sm border border-base-300">
           <div className="relative">
             <img
               src={imagePreview}
@@ -59,25 +64,25 @@ const MessageInput = () => {
             />
             <button
               onClick={removeImage}
-              className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-base-300
-              flex items-center justify-center"
+              className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-base-300
+              flex items-center justify-center border border-zinc-600 shadow-md hover:bg-base-200"
               type="button"
             >
-              <X className="size-3" />
+              <X className="size-4" />
             </button>
           </div>
         </div>
       )}
 
       <form onSubmit={handleSendMessage} className="flex items-center gap-2">
-        <div className="flex-1 flex gap-2">
-          <input
-            type="text"
-            className="w-full input input-bordered rounded-lg input-sm sm:input-md"
-            placeholder="Type a message..."
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-          />
+        <div className="flex-1 flex items-center bg-base-100 rounded-full px-4 py-2 shadow-sm border border-base-300">
+          <button
+            type="button"
+            className={`mr-2 transition-colors ${imagePreview ? "text-primary" : "text-base-content/50 hover:text-base-content"}`}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <Image size={22} />
+          </button>
           <input
             type="file"
             accept="image/*"
@@ -85,22 +90,21 @@ const MessageInput = () => {
             ref={fileInputRef}
             onChange={handleImageChange}
           />
-
-          <button
-            type="button"
-            className={`hidden sm:flex btn btn-circle
-                     ${imagePreview ? "text-emerald-500" : "text-zinc-400"}`}
-            onClick={() => fileInputRef.current?.click()}
-          >
-            <Image size={20} />
-          </button>
+          <input
+            type="text"
+            className="flex-1 bg-transparent border-none outline-none text-base px-2 py-1 placeholder-base-content/50"
+            placeholder="Type a message"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+          />
         </div>
+        
         <button
           type="submit"
-          className="btn btn-sm btn-circle"
-          disabled={!text.trim() && !imagePreview}
+          className={`btn btn-circle ${text.trim() || imagePreview ? 'btn-primary shadow-md' : 'btn-disabled bg-base-300'}`}
+          disabled={!text.trim() && !imagePreview || isSending}
         >
-          <Send size={22} />
+          <Send size={20} className={text.trim() || imagePreview ? 'text-primary-content' : 'text-base-content/30'} />
         </button>
       </form>
     </div>

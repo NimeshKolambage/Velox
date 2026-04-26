@@ -7,13 +7,13 @@ const SidebarSkeleton = () => {
   return (
     <aside
       className="h-full w-20 lg:w-72 border-r border-base-300 
-    flex flex-col transition-all duration-200"
+    flex flex-col transition-all duration-200 bg-base-100"
     >
       {/* Header */}
-      <div className="border-b border-base-300 w-full p-5">
+      <div className="border-b border-base-300 w-full p-4">
         <div className="flex items-center gap-2">
-          <Users className="w-6 h-6" />
-          <span className="font-medium hidden lg:block">Contacts</span>
+          <Users className="size-5 text-base-content/20" />
+          <span className="font-semibold hidden lg:block tracking-wide text-base-content/20">Chats</span>
         </div>
       </div>
 

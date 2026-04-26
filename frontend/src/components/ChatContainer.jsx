@@ -44,45 +44,38 @@ const ChatContainer = () => {
   }
 
   return (
-    <div className="flex-1 flex flex-col overflow-auto">
+    <div className="flex-1 flex flex-col overflow-auto bg-base-100">
       <ChatHeader />
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((message) => (
-          <div
-            key={message._id}
-            className={`chat ${message.senderId === authUser._id ? "chat-end" : "chat-start"}`}
-            ref={messageEndRef}
-          >
-            <div className=" chat-image avatar">
-              <div className="size-10 rounded-full border">
-                <img
-                  src={
-                    message.senderId === authUser._id
-                      ? authUser.profilePic || "/avatar.png"
-                      : selectedUser.profilePic || "/avatar.png"
-                  }
-                  alt="profile pic"
-                />
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 chat-bg-pattern bg-base-200/30">
+        {messages.map((message) => {
+          const isSentByMe = message.senderId === authUser._id;
+          return (
+            <div
+              key={message._id}
+              className={`chat ${isSentByMe ? "chat-end" : "chat-start"}`}
+              ref={messageEndRef}
+            >
+              <div className={`chat-bubble flex flex-col relative pb-6 px-4 pt-2.5 min-w-[90px] max-w-[85%] md:max-w-[75%] shadow-md ${isSentByMe ? 'chat-bubble-primary text-primary-content' : 'bg-base-100 text-base-content border border-base-300/50'}`}>
+                {message.image && (
+                  <img
+                    src={message.image}
+                    alt="Attachment"
+                    className="sm:max-w-[250px] rounded-lg mb-2 object-cover shadow-sm"
+                  />
+                )}
+                <p className="text-[15px] leading-relaxed whitespace-pre-wrap mr-10">{message.text}</p>
+
+                {/* Timestamp inside bubble, positioned at the bottom right */}
+                <div className={`absolute bottom-1 right-2 text-[10.5px] opacity-75 flex items-center gap-1 ${isSentByMe ? 'text-primary-content' : 'text-base-content'}`}>
+                  <span>{formatMessageTime(message.createdAt)}</span>
+                  {/* Mock read receipt for sent messages */}
+                  {isSentByMe && <span className="text-[14px] leading-none text-info">✓✓</span>}
+                </div>
               </div>
             </div>
-            <div className="chat-header mb-1">
-              <time className="text-xs opacity-50 ml-1">
-                {formatMessageTime(message.createdAt)}
-              </time>
-            </div>
-            <div className="chat-bubble flex flex-col">
-              {message.image && (
-                <img
-                  src={message.image}
-                  alt="Attachment"
-                  className="sm:max-w-[200px] rounded-md mb-2"
-                />
-              )}
-              {message.text && <p>{message.text}</p>}
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <MessageInput />
