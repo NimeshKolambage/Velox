@@ -48,10 +48,18 @@ export const useChatStore = create((set, get) => ({
     if (!selectedUser) return;
 
     const socket = useAuthStore.getState().socket;
+    if (!socket) return;
+
+    // Prevent duplicate listeners
+    socket.off("newMessage");
 
     socket.on("newMessage", (newMessage) => {
-      const isMessageSentFromSelectedUser = newMessage.senderId === selectedUser._id;
+      const isMessageSentFromSelectedUser = String(newMessage.senderId) === String(selectedUser._id);
       if (!isMessageSentFromSelectedUser) return;
+
+      // Prevent duplicate messages from appearing twice in the UI
+      const isDuplicate = get().messages.some((m) => m._id === newMessage._id);
+      if (isDuplicate) return;
 
       set({
         messages: [...get().messages, newMessage],
@@ -61,6 +69,7 @@ export const useChatStore = create((set, get) => ({
 
   unsubscribeFromMessages: () => {
     const socket = useAuthStore.getState().socket;
+    if (!socket) return;
     socket.off("newMessage");
   },
 

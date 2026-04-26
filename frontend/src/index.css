@@ -1,2 +1,30 @@
 @import "tailwindcss";
-@plugin "daisyui/index.js";
+
+@plugin "daisyui/index.js" {
+    themes: light --default, dark, cupcake, bumblebee, emerald, corporate, synthwave, retro, cyberpunk, valentine, halloween, garden, forest, aqua, lofi, pastel, fantasy, wireframe, black, luxury, dracula, cmyk, autumn, business, acid, lemonade, night, coffee, winter, dim, nord, sunset;
+}
+
+/* Custom aesthetic scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: oklch(var(--bc) / 0.2);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: oklch(var(--bc) / 0.4);
+}
+
+/* Subtle chat background pattern */
+.chat-bg-pattern {
+    background-image: radial-gradient(oklch(var(--bc) / 0.05) 1px, transparent 1px);
+    background-size: 20px 20px;
+}

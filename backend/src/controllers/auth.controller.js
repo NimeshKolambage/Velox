@@ -2,6 +2,7 @@ import { generateToken } from '../lib/utils.js';
 import User from '../models/user.model.js';
 import bcrypt from 'bcryptjs';
 import cloudinary from '../lib/cloudinary.js';
+import jwt from 'jsonwebtoken';
 
 export const signup = async (req, res) => {
     try {
@@ -34,8 +35,9 @@ export const signup = async (req, res) => {
         
         await newUser.save();
         generateToken(newUser._id, res);
-        
-        res.status(201).json({ message: "Signup successful" });
+
+        const createdUser = await User.findById(newUser._id).select("-password");
+        res.status(201).json(createdUser);
     } catch (error) {
         console.error("Signup error:", error);
         res.status(500).json({ message: "Server error", error: error.message });
@@ -61,7 +63,9 @@ export const login = async (req, res) => {
         }
 
         generateToken(user._id, res);
-        res.status(200).json({ message: "Login successful" });
+
+        const loggedInUser = await User.findById(user._id).select("-password");
+        res.status(200).json(loggedInUser);
     } catch (error) {
         res.status(500).json({ message: "Server error" });
         console.error(error, "Error in login controller");
@@ -86,15 +90,15 @@ export const updateProfile=async(req,res)=>{
 
     try{
         const {profilePic}=req.body;
-        const user = req.user._id;
+        const userId = req.user._id;
 
         if(!profilePic){
             return res.status(400).json({ message: "Profile picture is required" });
         }
 
-        const uplaodResponse=await cloudinary.uploader.upload(profilePic)
-        const updateUser=await User.findByIdAndUpdate(userId,{profilePicture:uplaodResponse.secure_url},{new:true}).select("-password");
-        res.status(200).json({ message: "Profile updated successfully", user:updateUser });
+        // Bypass Cloudinary and save the base64 string directly to the database
+        const updatedUser=await User.findByIdAndUpdate(userId,{profilePic:profilePic},{new:true}).select("-password");
+        res.status(200).json(updatedUser);
 
     }
     catch(error){
@@ -103,13 +107,26 @@ export const updateProfile=async(req,res)=>{
     }
 }
 
-export const checkAuth=async(req,res)=>{
-    try{
-        
-        res.status(200).json(req.user);
+export const checkAuth = async (req, res) => {
+    try {
+        const token = req.cookies.token;
+        if (!token) {
+            return res.status(200).json(null);
+        }
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        if (!decoded) {
+            return res.status(200).json(null);
+        }
+
+        const user = await User.findById(decoded.userId).select("-password");
+        if (!user) {
+            return res.status(200).json(null);
+        }
+
+        res.status(200).json(user);
+    } catch (error) {
+        console.error("Error in check auth controller:", error);
+        res.status(200).json(null);
     }
-    catch(error){
-        res.status(500).json({ message: "Server error" });
-        console.error(error, "Error in check auth controller");
-    }
-}
+};
