@@ -1,0 +1,13 @@
+{
+  "name": "velox",
+  "version": "1.0.0",
+  "description": "A modern, responsive messaging platform",
+  "main": "backend/src/index.js",
+  "scripts": {
+    "build": "npm install --prefix frontend && npm run build --prefix frontend && npm install --prefix backend",
+    "start": "NODE_ENV=production npm start --prefix backend"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
